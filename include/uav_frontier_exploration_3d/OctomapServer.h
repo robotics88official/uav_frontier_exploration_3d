@@ -31,7 +31,7 @@
 #include <octomap/octomap.h>
 #include <octomap/OcTreeKey.h>
 #include <octomap/OcTree.h>
-#include <octomap/OcTreeLUT.h>
+#include <uav_frontier_exploration_3d/OctomapLUT.h>
 
 #include <stdio.h>
 #include <fstream>
@@ -103,7 +103,7 @@ namespace octomap_server
       octomap::KeyRay m_keyRaysphere;
       octomap::OcTreeKey m_updateBBXMin;
       octomap::OcTreeKey m_updateBBXMax;
-      octomap::OcTreeLUT m_lut {16};
+      octomap_lut::OcTreeLUT m_lut {16};
 
       PCLPointCloudI m_changedCells;
       std::string m_worldFrameId, m_baseFrameId; 
