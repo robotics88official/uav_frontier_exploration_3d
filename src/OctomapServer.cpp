@@ -294,7 +294,7 @@ namespace octomap_server
 		{
 			m_tfListener.lookupTransform(
 				m_worldFrameId, m_currPointCloud.header.frame_id,
-				m_currPointCloud.header.stamp, sensorToWorldTf);
+				ros::Time(0), sensorToWorldTf);
 		} catch(tf::TransformException& ex){
 			ROS_ERROR_STREAM( "Transform error of sensor data: "
 				<< ex.what() << ", quitting callback");

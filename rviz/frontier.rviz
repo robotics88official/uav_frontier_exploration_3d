@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /TrajectoryNodeArray1/Namespaces1
+        - /TF1/Frames1
       Splitter Ratio: 0.5411764979362488
     Tree Height: 926
   - Class: rviz/Selection
@@ -53,13 +54,13 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/Axes
-      Enabled: true
+      Enabled: false
       Length: 2
       Name: Axes
       Radius: 0.30000001192092896
       Reference Frame: world
       Show Trail: false
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /airsim_ros_node/free_cells_vis_array
@@ -94,7 +95,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /red/best_frontier_marker
+      Marker Topic: /airsim_ros_node/best_frontier_marker
       Name: BestFrontierMarker
       Namespaces:
         {}
@@ -188,6 +189,80 @@ Visualization Manager:
       Topic: /airsim_ros_node/exploration/goal
       Unreliable: false
       Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_link:
+          Value: true
+        base_link_frd:
+          Value: false
+        base_link_frd/Lidar2:
+          Value: false
+        base_link_frd/odom:
+          Value: false
+        front_center_custom_body:
+          Value: false
+        front_center_custom_optical:
+          Value: false
+        front_left_custom_body:
+          Value: false
+        front_left_custom_optical:
+          Value: false
+        front_right_custom_body:
+          Value: false
+        front_right_custom_optical:
+          Value: false
+        map:
+          Value: true
+        map_ned:
+          Value: false
+        odom:
+          Value: false
+        odom_ned:
+          Value: false
+        world:
+          Value: false
+        world_ned:
+          Value: false
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        odom:
+          base_link_frd/odom:
+            {}
+          odom_ned:
+            {}
+        world_ned:
+          world:
+            map:
+              base_link:
+                base_link_frd:
+                  base_link_frd/Lidar2:
+                    {}
+                  front_center_custom_body:
+                    {}
+                  front_center_custom_optical:
+                    {}
+                  front_left_custom_body:
+                    {}
+                  front_left_custom_optical:
+                    {}
+                  front_right_custom_body:
+                    {}
+                  front_right_custom_optical:
+                    {}
+              map_ned:
+                {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
@@ -216,7 +291,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 105.04005432128906
+      Distance: 59.77003479003906
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -224,17 +299,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -7.560546875
-        Y: -45.08115768432617
-        Z: -5.817706914967857e-05
-      Focal Shape Fixed Size: true
+        X: 1.896467685699463
+        Y: -20.639999389648438
+        Z: -1.2724278349196538e-05
+      Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8847968578338623
+      Pitch: 0.825398325920105
       Target Frame: <Fixed Frame>
-      Yaw: 4.726010322570801
+      Yaw: 4.778591632843018
     Saved: ~
 Window Geometry:
   Displays:
