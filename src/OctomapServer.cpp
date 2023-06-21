@@ -43,6 +43,8 @@ namespace octomap_server
 			&OctomapServer::pointCloudCallback, this);
 		m_uavGlobalPoseSub = m_nh.subscribe("odometry", 1, 
 			&OctomapServer::globalPoseCallback, this);	
+		m_uavLocalPoseSub = m_nh.subscribe("/mavros/local_position/pose", 1, 
+			&OctomapServer::localPoseCallback, this);	
 		m_saveOctomapServer = m_nh.advertiseService(
     	"exploration/save_octomap", &OctomapServer::saveOctomapServiceCb, this);	
 	}
@@ -90,10 +92,14 @@ namespace octomap_server
 		m_pointCloudReceivedFlag = true;
 	}
 
+	void OctomapServer::localPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
+		m_uavCurrentPose = msg->pose;
+	}
+
 	void OctomapServer::globalPoseCallback(
 		const nav_msgs::Odometry::ConstPtr& msg)
 	{
-		m_uavCurrentPose = msg->pose.pose;
+		// m_uavCurrentPose = msg->pose.pose;
 	}
 
 	bool OctomapServer::saveOctomapServiceCb(

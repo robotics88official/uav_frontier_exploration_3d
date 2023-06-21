@@ -58,6 +58,7 @@ namespace octomap_server
 
       void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud);
       void globalPoseCallback(const nav_msgs::Odometry::ConstPtr& msg);
+      void localPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
       bool configureFromFile(string config_filename);
       void runDefault();
       octomap::OcTree* getOcTree(){ return m_octree; }
@@ -93,7 +94,7 @@ namespace octomap_server
 
       ros::NodeHandle m_nh;
       ros::Publisher  m_markerOccPub, m_markerFreePub, m_binaryMapPub, m_pubVolumes;
-      ros::Subscriber m_pointCloudSub, m_uavGlobalPoseSub;
+      ros::Subscriber m_pointCloudSub, m_uavGlobalPoseSub, m_uavLocalPoseSub;
       ros::ServiceServer m_saveOctomapServer;
       tf::TransformListener m_tfListener;
       sensor_msgs::PointCloud2 m_currPointCloud;

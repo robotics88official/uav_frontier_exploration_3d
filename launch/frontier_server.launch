@@ -1,10 +1,10 @@
 <launch>
   <arg name="rate" default="1"/>
-  <arg name="namespace" default="$(env UAV_NAMESPACE)"/>
-  <arg name="odometry" default="odometry"/>
-  <arg name="cloud_in" default="submap_cloud"/>
+  <arg name="namespace" default="airsim_ros_node"/>
+  <arg name="odometry" default="/mavros/local_position/odom"/>
+  <arg name="cloud_in" default="/airsim_ros_node/base_link_frd/lidar/Lidar2"/>
   <arg name="point_reached" default="exploration/point_reached"/>
-  <arg name="config_filename" default="$(find uav_frontier_exploration_3d)/config/kopterworx_exploration_sim_large_env.yaml"/>
+  <arg name="config_filename" default="$(find uav_frontier_exploration_3d)/config/airsim.yaml"/>
   
   <group ns="$(arg namespace)">
     <node name="frontier_server_node" pkg="uav_frontier_exploration_3d" type="frontier_server_node" output="screen">
@@ -15,4 +15,6 @@
       <remap from="point_reached" to="$(arg point_reached)"/>
     </node>
    </group>
+
+   <node type="rviz" name="frontier_rviz" pkg="rviz" args="-d $(find uav_frontier_exploration_3d)/rviz/frontier.rviz" output="log"/>
 </launch>
