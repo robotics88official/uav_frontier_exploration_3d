@@ -8,6 +8,8 @@
 #include <std_srvs/SetBool.h>
 #include <std_msgs/Int32.h>
 
+#include "messages_88/GetFrontiers.h"
+
 namespace frontier_server
 {
   enum ExplorationState {
@@ -44,6 +46,7 @@ namespace frontier_server
 
     protected:
       KeySet findFrontier(PCLPointCloudI& changedCells);
+      bool searchFrom(messages_88::GetFrontiers::Request& req, messages_88::GetFrontiers::Response& resp);
       void searchForParentsAndPublish();
       void updateGlobalFrontier(KeySet& globalFrontierCell);
       void clusterFrontierAndPublish();
@@ -111,6 +114,9 @@ namespace frontier_server
       geometry_msgs::PoseStamped m_uavCurrentReference;
       ros::ServiceServer m_serviceExploration;  
       ExplorationState m_currentState = ExplorationState::OFF;
+
+      // service
+      ros::ServiceServer search_server_;
     };
 }
 #endif

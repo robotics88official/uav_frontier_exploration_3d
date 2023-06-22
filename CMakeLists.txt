@@ -24,7 +24,9 @@ find_package(catkin REQUIRED COMPONENTS
   octomap_ros
   nodelet
   mean_shift_clustering
+  messages_88
 )
+
 find_package(Boost)
 find_package(PCL 1.8 REQUIRED COMPONENTS
     common

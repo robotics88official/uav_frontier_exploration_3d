@@ -41,6 +41,8 @@ namespace frontier_server
 		// Initialize position hold service if exploration is off
 		m_serviceExploration = m_nh.advertiseService("exploration/toggle",
 			&FrontierServer::toggleExplorationServiceCb, this);
+
+		search_server_ = m_nh.advertiseService("get_frontiers", &FrontierServer::searchFrom, this);
 	}
 
 	FrontierServer::~FrontierServer()
@@ -50,6 +52,86 @@ namespace frontier_server
 			delete m_octree;
 			m_octree = NULL;
 		}	
+	}
+
+	bool FrontierServer::searchFrom(messages_88::GetFrontiers::Request& req, messages_88::GetFrontiers::Response& resp) {
+		// TODO clean up and verify the logic flow, revise so returns all frontiers with scores
+		// Also it switches goals too fast, ends up making no progress, debug
+	// case ExplorationState::CHECKFORFRONTIERS:
+		m_octomapServer.runDefault();
+		m_octomapServer.publishVolume();
+		m_uavCurrentPose = m_octomapServer.getCurrentUAVPosition();
+		// if(!m_currentGoalReached)
+			ROS_WARN_STREAM_THROTTLE(3.0,
+			m_bestFrontierPoint.x() << " " << m_bestFrontierPoint.y() << " " 
+			<< m_bestFrontierPoint.z() << " -> Goal published!");
+		// Update octomap
+		m_octree = m_octomapServer.getOcTree();	
+		// Get changed cells
+		m_changedCells = m_octomapServer.getChangedCells();
+		// if (m_changedCells.size() > 0)
+			// setStateAndPublish(ExplorationState::ON);
+
+	// case ExplorationState::ON:
+		KeySet globalFrontierCells = findFrontier(m_changedCells);
+		// Delete frontiers that are explored now
+		updateGlobalFrontier(globalFrontierCells);	
+		// Find frontiers on the upper level (m_explorationDepth) and publish it
+		searchForParentsAndPublish();
+		// If there is no parents switch to CHECKFORFRONTIERS
+		// if (!m_parentFrontierCells.size() > 0) 
+		// 	setStateAndPublish(ExplorationState::CHECKFORFRONTIERS);
+		// // If the previous goal is reached
+		// // else if (m_currentGoalReached)
+		// // 	setStateAndPublish(ExplorationState::POINTREACHED);
+		// else 
+			// setStateAndPublish(ExplorationState::CHECKFORFRONTIERS);
+
+	// case ExplorationState::POINTREACHED:
+		// Find Best Frontier
+		m_currentGoalReached = false;
+		// Delete candidates that are too close to prevoius assigned points
+		
+		clusterFrontierAndPublish();
+		point3d currentPoint3d(m_uavCurrentPose.position.x, 
+			m_uavCurrentPose.position.y, m_uavCurrentPose.position.z);
+		// TODO make it return all frontiers and their scores
+		m_bestFrontierPoint = 
+				m_bestFrontierServer.bestFrontierInfGain(m_octree, currentPoint3d, m_clusteredCellsUpdated);
+		// m_bestFrontierPoint = 
+		// 	m_bestFrontierServer.closestFrontier(m_octree, currentPoint3d, m_clusteredCellsUpdated);
+		m_logfile << "Best frontier: " << m_bestFrontierPoint << endl;
+		
+		m_allUAVGoals.push_back(m_bestFrontierPoint);
+		cout << "Best frontier: " << m_bestFrontierPoint << endl;
+		publishBestFrontier();
+		publishUAVGoal(m_bestFrontierPoint);
+		// ros::Duration(0.05).sleep();
+		// setStateAndPublish(ExplorationState::CHECKFORFRONTIERS);
+		messages_88::Frontier front;
+		// Just fill in placeholder details for now
+		geometry_msgs::Point point;
+		point.x = m_bestFrontierPoint.x();
+		point.y = m_bestFrontierPoint.y();
+		point.z = m_bestFrontierPoint.z();
+		front.centroid = point;
+		front.initial = point;
+		front.middle = point;
+		std::vector<geometry_msgs::Point> points;
+		points.push_back(point);
+		front.points = points;
+		front.size = 1;
+		front.min_distance = 10.0;
+		front.cost = 1.0;
+		std::vector<double> scores;
+		scores.push_back(1.0);
+		scores.push_back(1.0);
+		scores.push_back(1.0);
+		front.utility_scores = scores;
+		std::vector<messages_88::Frontier> frontiers;
+		frontiers.push_back(front);
+		resp.frontiers.frontier_list = frontiers;
+		return true;
 	}
 
 	bool FrontierServer::configureFromFile(string config_filename)
