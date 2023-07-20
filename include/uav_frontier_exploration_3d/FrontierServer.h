@@ -46,6 +46,8 @@ namespace frontier_server
 
     protected:
       KeySet findFrontier(PCLPointCloudI& changedCells);
+      bool acceptFrontier(const pcl::PointXYZI& point);
+      bool isInside(const geometry_msgs::Polygon& polygon, const pcl::PointXYZI& point);
       bool searchFrom(messages_88::GetFrontiers::Request& req, messages_88::GetFrontiers::Response& resp);
       void searchForParentsAndPublish();
       void updateGlobalFrontier(KeySet& globalFrontierCell);
@@ -117,6 +119,9 @@ namespace frontier_server
 
       // service
       ros::ServiceServer search_server_;
+      geometry_msgs::Polygon bounding_polygon_;
+      float min_altitude_;
+      float max_altitude_;
     };
 }
 #endif

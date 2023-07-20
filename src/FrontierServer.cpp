@@ -58,6 +58,10 @@ namespace frontier_server
 		// TODO clean up and verify the logic flow, revise so returns all frontiers with scores
 		// Also it switches goals too fast, ends up making no progress, debug
 	// case ExplorationState::CHECKFORFRONTIERS:
+		bounding_polygon_ = req.polygon;
+		min_altitude_ = req.min_altitude;
+		max_altitude_ = req.max_altitude;
+
 		m_octomapServer.runDefault();
 		m_octomapServer.publishVolume();
 		m_uavCurrentPose = m_octomapServer.getCurrentUAVPosition();
@@ -173,12 +177,9 @@ namespace frontier_server
 		for(int i = 0; i < changedCells.points.size(); i++)
 		{
 			// Check if the point is inside the bounding box
-			if(changedCells.points[i].x < m_explorationMinX ||
-				changedCells.points[i].x > m_explorationMaxX ||
-				changedCells.points[i].y < m_explorationMinY ||
-				changedCells.points[i].y > m_explorationMaxY ||
-				changedCells.points[i].z < m_explorationMinZ ||
-				changedCells.points[i].z > m_explorationMaxZ) continue;
+			if (!acceptFrontier(changedCells.points[i])) {
+				continue;
+			}
 			// Get changed point
 			point3d changedCellPoint(
 				changedCells.points[i].x,
@@ -222,6 +223,45 @@ namespace frontier_server
 		double total_time = (ros::WallTime::now() - startTime).toSec();
 		m_logfile << "findFrontier - used total: "<< total_time << " sec" <<endl;
 		return globalFrontierCells;
+	}
+
+	bool FrontierServer::acceptFrontier(const pcl::PointXYZI& point) {
+		if (point.x == 0.0 && point.y == 0.0 && point.z == 0.0) {
+			// 3D frontier search sometimes needs to submit this point several times before returns valid results, will be rejected at the decision-making node so it's fine for now
+			// TODO figure out why this is the case and fix it at the root source
+			return true;
+		}
+		if (point.z < min_altitude_ || point.z > max_altitude_) {
+			return false;
+		}
+		if (!isInside(bounding_polygon_, point)) {
+			return false;
+		}
+		return true;
+	}
+
+	bool FrontierServer::isInside(const geometry_msgs::Polygon& polygon, const pcl::PointXYZI& point)
+	{
+		// TODO should make a map_util class to copy into packages that need it (eg, monarch)
+
+		// Determine if the given point is inside the polygon using the number of crossings method
+		// https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+		int n = polygon.points.size();
+		int cross = 0;
+		// Loop from i = [0 ... n - 1] and j = [n - 1, 0 ... n - 2]
+		// Ensures first point connects to last point
+		for (int i = 0, j = n - 1; i < n; j = i++)
+		{
+			// Check if the line to x,y crosses this edge
+			if ( ((polygon.points[i].y > point.y) != (polygon.points[j].y > point.y))
+				&& (point.x < (polygon.points[j].x - polygon.points[i].x) * (point.y - polygon.points[i].y) /
+					(polygon.points[j].y - polygon.points[i].y) + polygon.points[i].x) )
+			{
+			cross++;
+			}
+		}
+		// Return true if the number of crossings is odd
+		return cross % 2 > 0;
 	}
 
 	void FrontierServer::updateGlobalFrontier(KeySet& globalFrontierCells)
@@ -732,12 +772,11 @@ namespace frontier_server
 	void FrontierServer::publishUAVGoal(point3d goal)
 	{
 		// // Make sure that point is in the bounding box
-		if (goal.x() < m_explorationMinX || 
-			goal.x() > m_explorationMaxX ||
-			goal.y() < m_explorationMinY || 
-			goal.y() > m_explorationMaxY ||
-			goal.z() < m_explorationMinZ || 
-			goal.z() > m_explorationMaxZ) 
+		pcl::PointXYZI pt;
+		pt.x = goal.x();
+		pt.y = goal.y();
+		pt.z = goal.z();
+		if (!acceptFrontier(pt))
 		{
 			ROS_ERROR("Want to publish a goal out of the bounding box.");
 			setPointAsInvalid(goal);
