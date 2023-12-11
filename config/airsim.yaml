@@ -1,5 +1,5 @@
 exploration:
-  global_frame: "map"
+  global_frame: "slam_map"
   base_link_frame: "base_link"
   # Exploration depth of octomap tree. 16 is best resolution, slowest exploration
   # Save frontiers on that level
